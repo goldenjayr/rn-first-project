@@ -1,38 +1,40 @@
 import React, {useState} from 'react';
-import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
+import { StyleSheet, View, Button, ScrollView } from 'react-native';
+import GoalItem from './components/GoalItem'
+import GoalInput from './components/GoalInput'
 
 export default function App() {
-  const [enteredGoal, setEnteredGoal] = useState('')
   const [courseGoals, setCourseGoals] = useState([])
+  const [isModalVisible, setIsModalVisible] = useState(false)
 
-  const goalInputHandler = enteredText => {
-    setEnteredGoal(enteredText)
+  const addGoalHandler = enteredGoal => {
+    setCourseGoals(currentGoals => [...currentGoals,
+      {id: Math.random().toString(), value: enteredGoal}
+    ])
+
+    setIsModalVisible(false)
   }
 
-  const addGoalHandler = () => {
-    setCourseGoals(currentGoals => [...currentGoals, enteredGoal])
+  const cancelGoalHandler = () => {
+    setIsModalVisible(false)
   }
 
+  const deleteGoal = goalId => {
+    setCourseGoals(courseGoals => {
+      return courseGoals.filter(goal => goal.id !== goalId)
+    })
+  }
  return (
    <View style={styles.screen}>
-     <View style={styles.inputContainer}>
-        <TextInput  
-        placeholder="Course Goal"
-        style={styles.input}
-        onChangeText={goalInputHandler}
-        value={enteredGoal}
-        />
-        <Button title="ADD" onPress={addGoalHandler} />
-     </View>
-     <View>
+       <Button title="Add new goal" onPress={() => setIsModalVisible(true)} />
+     <GoalInput addGoal={addGoalHandler} visible={isModalVisible} onCancel={cancelGoalHandler} />
+     <ScrollView>
         {courseGoals.map(goal => {
           return (
-          <View key={goal} style={styles.listItem}>
-            <Text>{goal}</Text>
-          </View>
+            <GoalItem key={goal.id} id={goal.id} goal={goal.value} onClickDelete={deleteGoal} />
           )
         })}
-     </View>
+     </ScrollView>
    </View>
  );
 }
@@ -41,23 +43,5 @@ export default function App() {
 const styles = StyleSheet.create({
   screen: {
     padding: 50
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  input: {
-    width: '80%',
-    borderColor: 'black',
-    borderWidth: 1,
-    padding: 10
-  },
-  listItem: {
-    padding: 10,
-    backgroundColor: '#ccc',
-    borderColor: 'black',
-    borderWidth: 1,
-    marginVertical: 10
   }
 })
